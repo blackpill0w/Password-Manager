@@ -47,10 +47,13 @@
        <property name="orientation">
         <enum>Qt::Vertical</enum>
        </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Fixed</enum>
+       </property>
        <property name="sizeHint" stdset="0">
         <size>
          <width>20</width>
-         <height>40</height>
+         <height>100</height>
         </size>
        </property>
       </spacer>
@@ -233,6 +236,12 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>goBackButton</tabstop>
+  <tabstop>usernameLineEdit</tabstop>
+  <tabstop>passwordLineEdit</tabstop>
+  <tabstop>submitLoginButton</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

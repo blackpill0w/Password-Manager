@@ -56,10 +56,13 @@
        <property name="orientation">
         <enum>Qt::Vertical</enum>
        </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Fixed</enum>
+       </property>
        <property name="sizeHint" stdset="0">
         <size>
          <width>20</width>
-         <height>40</height>
+         <height>70</height>
         </size>
        </property>
       </spacer>
@@ -218,14 +221,20 @@
      </item>
      <item alignment="Qt::AlignHCenter">
       <widget class="QLabel" name="errorsLabel">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="maximumSize">
         <size>
-         <width>400</width>
-         <height>20</height>
+         <width>200</width>
+         <height>50</height>
         </size>
        </property>
        <property name="text">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#ff1111;&quot;&gt;Errors Label&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#e01b24;&quot;&gt;Errors Label&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
       </widget>
      </item>
@@ -235,7 +244,7 @@
         <enum>Qt::Vertical</enum>
        </property>
        <property name="sizeType">
-        <enum>QSizePolicy::Minimum</enum>
+        <enum>QSizePolicy::Fixed</enum>
        </property>
        <property name="sizeHint" stdset="0">
         <size>
@@ -293,6 +302,13 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>goBackButton</tabstop>
+  <tabstop>usernameLineEdit</tabstop>
+  <tabstop>passwordLineEdit</tabstop>
+  <tabstop>passwordConfimationLineEdit</tabstop>
+  <tabstop>submitSignUpButton</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

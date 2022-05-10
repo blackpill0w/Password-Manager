@@ -1,6 +1,8 @@
-from PyQt6.QtWidgets import QApplication, QMainWindow, QFrame, QPushButton, QLabel, QLineEdit
+from PyQt6.QtWidgets import (
+    QApplication, QMainWindow, QFrame, QPushButton, QLabel, QLineEdit, QTableView)
 from PyQt6.uic import loadUi
 import sys
+from loginFunctions import isUsernameValid, isPasswordAndConfirmationValid
 
 
 class MainWindow(QMainWindow):
@@ -21,6 +23,7 @@ class MainWindow(QMainWindow):
 
         self._loadLoginWindowVars()
         self._loadSignUpWindowVars()
+        self._loadLoggedInWindowVars()
 
         self.show()
 
@@ -36,6 +39,8 @@ class MainWindow(QMainWindow):
         # Submit Button
         self.loginSubmitButton = self.loginFrame.findChild(
             QPushButton, name='submitLoginButton')
+        # self.loginSubmitButton.clicked.connect(lambda: checkLoginCreds(
+        #     self.loginUsernameLineEdit.text(), self.loginPasswordLineEdit.text()))
         # Go Back Button
         self.goBackButton = self.loginFrame.findChild(
             QPushButton, name='goBackButton')
@@ -45,6 +50,14 @@ class MainWindow(QMainWindow):
         self.loginErrorsLabel = self.loginFrame.findChild(
             QLabel, name='errorsLabel')
         self.loginErrorsLabel.setText('')
+
+    def _signUp(self, username, password, confirmation):
+        if isUsernameValid(username, self.signUpErrorsLabel)\
+            and isPasswordAndConfirmationValid(
+            password, confirmation, self.signUpErrorsLabel
+        ):
+            self._changeActiveFrame(
+                self.signUpFrame, self.loggedInFrame, 'Password Manager')
 
     def _loadSignUpWindowVars(self):
         # Sign Up Frame
@@ -56,11 +69,17 @@ class MainWindow(QMainWindow):
         self.signUpPasswordLineEdit = self.signUpFrame.findChild(
             QLineEdit, name='passwordLineEdit')
         # Password Confirmation Line Edit
-        self.signUpPasswordLineEdit = self.signUpFrame.findChild(
+        self.signUpPasswordConfirmationLineEdit = self.signUpFrame.findChild(
             QLineEdit, name='passwordConfimationLineEdit')
         # Submit Button
         self.signUpSubmitButton = self.signUpFrame.findChild(
             QPushButton, name='submitSignUpButton')
+        self.signUpSubmitButton.clicked.connect(
+            lambda: self._signUp(
+                self.signUpUsernameLineEdit.text(),
+                self.signUpPasswordLineEdit.text(),
+                self.signUpPasswordConfirmationLineEdit.text()
+            ))
         # Go Back Button
         self.goBackButton = self.signUpFrame.findChild(
             QPushButton, name='goBackButton')
@@ -70,6 +89,24 @@ class MainWindow(QMainWindow):
         self.signUpErrorsLabel = self.signUpFrame.findChild(
             QLabel, name='errorsLabel')
         self.signUpErrorsLabel.setText('')
+        self.signUpErrorsLabel.setStyleSheet('color: red')
+
+    def _loadLoggedInWindowVars(self):
+        # Logged In Frame
+        self.loggedInFrame = loadUi('loggedInFrame.ui')
+        # Add Password Button
+        self.addPasswordButton = self.loggedInFrame.findChild(
+            QPushButton, name='addPasswordButton')
+        # TODO
+        # Log Out Button
+        self.logOutButton = self.loggedInFrame.findChild(
+            QPushButton, name='logOutButton')
+        # TODO
+        self.logOutButton.clicked.connect(lambda:
+            self._changeActiveFrame(
+                self.loggedInFrame, self.initialFrame, 'Password Manager'))
+        # Table To Show Passwords
+        self.dataTable = self.loggedInFrame.findChild(QTableView, 'dataTable')
 
     def _changeActiveFrame(self, frameToHide, frameToShow, newWindowTitle):
         frameToHide.hide()
@@ -78,6 +115,11 @@ class MainWindow(QMainWindow):
         self.setWindowTitle(newWindowTitle)
 
 
-app = QApplication(sys.argv)
-window = MainWindow()
-sys.exit(app.exec())
+def main():
+    app = QApplication(sys.argv)
+    window = MainWindow()
+    sys.exit(app.exec())
+
+
+if __name__ == '__main__':
+    main()
