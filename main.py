@@ -2,7 +2,8 @@ from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QFrame, QPushButton, QLabel, QLineEdit, QTableView)
 from PyQt6.uic import loadUi
 import sys
-from loginFunctions import isUsernameValid, isPasswordAndConfirmationValid
+from loginFunctions import (isUsernameValid, isPasswordAndConfirmationValid,
+    submitSignUp, addUser, checkAppDir, makeUserDb)
 
 
 class MainWindow(QMainWindow):
@@ -52,12 +53,13 @@ class MainWindow(QMainWindow):
         self.loginErrorsLabel.setText('')
 
     def _signUp(self, username, password, confirmation):
-        if isUsernameValid(username, self.signUpErrorsLabel)\
-            and isPasswordAndConfirmationValid(
-            password, confirmation, self.signUpErrorsLabel
-        ):
-            self._changeActiveFrame(
-                self.signUpFrame, self.loggedInFrame, 'Password Manager')
+        # Check that username and password are valid
+        if isUsernameValid(username, self.signUpErrorsLabel) and \
+        isPasswordAndConfirmationValid(password, confirmation, self.signUpErrorsLabel):
+            # Check that username is not taken
+            if submitSignUp(username, password, self.signUpErrorsLabel):
+                self._changeActiveFrame(
+                    self.signUpFrame, self.loggedInFrame, 'Password Manager')
 
     def _loadSignUpWindowVars(self):
         # Sign Up Frame
@@ -103,8 +105,8 @@ class MainWindow(QMainWindow):
             QPushButton, name='logOutButton')
         # TODO
         self.logOutButton.clicked.connect(lambda:
-            self._changeActiveFrame(
-                self.loggedInFrame, self.initialFrame, 'Password Manager'))
+                                          self._changeActiveFrame(
+                                              self.loggedInFrame, self.initialFrame, 'Password Manager'))
         # Table To Show Passwords
         self.dataTable = self.loggedInFrame.findChild(QTableView, 'dataTable')
 
