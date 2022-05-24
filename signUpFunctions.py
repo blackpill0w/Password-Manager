@@ -2,6 +2,77 @@ import re, sqlite3, os
 from hashlib import sha256
 from settings import DB_DIR, USERS_DB_PATH, PASSWORDS_TABLE, USERS_TABLE
 
+def sha256Encrypt(text) -> str:
+    """SHA256 encryption made simple."""
+    encoded_text = text.encode()
+    return sha256(encoded_text).hexdigest()
+
+def checkAppDir():
+    """Check if the application directory (usually named npassword_manager) exists.
+    If it doesn't, create it. Also, create a user.sqlite database that has a table (user, password).
+    """
+    if not os.path.exists(DB_DIR):
+        os.mkdir(DB_DIR)
+
+        conn = sqlite3.connect(USERS_DB_PATH)
+        cur = conn.cursor()
+
+        cur.execute(f"CREATE TABLE {USERS_TABLE} (user TEXT, password TEXT)")
+
+        conn.commit()
+        conn.close()
+
+def isUserExist(username):
+    """Check if user has an account, returns a bool value."""
+
+    conn = sqlite3.connect(USERS_DB_PATH)
+    cur = conn.cursor()
+
+    result = list(
+        cur.execute(
+            f"SELECT * FROM {USERS_TABLE} WHERE user = :username",
+            {"username": username},
+        ),
+    )
+    conn.close()
+
+    return False if result == [] else True
+
+def getPasswordsFromDatabase(dbPath) -> list:
+    conn = sqlite3.connect(dbPath)
+    cur = conn.cursor()
+    
+    data = list(cur.execute(f'SELECT * FROM {PASSWORDS_TABLE}'))
+
+    conn.close()
+
+    return data
+
+def submitLogin(username, password, errorsLabel) -> bool:
+    # Var to be returned
+    validLogin = True
+    
+    encrypted_password = sha256Encrypt(password)
+    conn = sqlite3.connect(USERS_DB_PATH)
+    cur = conn.cursor()
+
+    result = list(
+        cur.execute(
+            f"SELECT * FROM {USERS_TABLE} WHERE user = :username AND password = :password",
+            {"username": username, "password": encrypted_password},
+        ),
+    )
+    conn.close()
+
+    if result == []:
+        errorsLabel.setText("Invalid username or password")
+        validLogin = False
+    else:
+        dbPath = f"{DB_DIR}/{username}.sqlite"
+        data = getPasswordsFromDatabase(dbPath)
+        # TODO: Add passwords to the table
+    return validLogin
+
 def isUsernameValid(username, errorsLabel) -> bool:
     """
     Check if username is valid.
@@ -32,75 +103,47 @@ def isPasswordAndConfirmationValid(password, confirmation, errorsLabel) -> bool:
         errorsLabel.setText('Invalid password.')
         return False
 
-def sha256Encrypt(text) -> str:
-    """SHA256 encryption made simple."""
-    encoded_text = text.encode()
-    return sha256(encoded_text).hexdigest()
-
-def checkAppDir():
-    """Check if the application directory (usually named npassword_manager) exists.
-    If it doesn't, create it. Also, create a user.sqlite database that has a table (user, password).
-    """
-    if not os.path.exists(DB_DIR):
-        os.mkdir(DB_DIR)
-
-        connection = sqlite3.connect(USERS_DB_PATH)
-        cursor = connection.cursor()
-
-        cursor.execute(f"CREATE TABLE {USERS_TABLE} (user TEXT, password TEXT)")
-
-        connection.commit()
-        connection.close()
-
-def isUserExist(username):
-    """Check if user has an account, returns a bool value."""
-
-    connection = sqlite3.connect(USERS_DB_PATH)
-    cursor = connection.cursor()
-
-    result = list(
-        cursor.execute(
-            f"SELECT * FROM {USERS_TABLE} WHERE user = :username",
-            {"username": username},
-        ),
-    )
-    connection.close()
-
-    return False if result == [] else True
-
 def makeUserDb(username):
     """Create a database for the user, and create a passwords table (description, password)."""
 
     dbPath = f"{DB_DIR}/{username}.sqlite"
 
-    connection = sqlite3.connect(dbPath)
-    cursor = connection.cursor()
+    conn = sqlite3.connect(dbPath)
+    cur = conn.cursor()
 
-    cursor.execute(f"CREATE TABLE {PASSWORDS_TABLE} (description TEXT, password TEXT)")
+    cur.execute(f"CREATE TABLE {PASSWORDS_TABLE} (description TEXT, password TEXT)")
 
-    connection.commit()
-    connection.close()
+    conn.commit()
+    conn.close()
 
 def addUser(username, password):
     """Add user to the users database."""
 
     encrypted_password = sha256Encrypt(password)
 
-    connection = sqlite3.connect(USERS_DB_PATH)
-    cursor = connection.cursor()
-    cursor.execute(
+    conn = sqlite3.connect(USERS_DB_PATH)
+    cur = conn.cursor()
+    cur.execute(
         f"INSERT INTO {USERS_TABLE} VALUES (?, ?)",
         (username, encrypted_password),
     )
-    connection.commit()
-    connection.close()
+    conn.commit()
+    conn.close()
 
-def submitSignUp(username, password, errorsLabel):
-    checkAppDir()
-    if not isUserExist(username):
-        makeUserDb(username)
-        addUser(username, password)
-        return True
+def submitSignUp(username, password, errorsLabel) -> bool:
+    # Variable to be returned
+    validSignUp = True
+
+    if isUsernameValid(username, self.signUpErrorsLabel) and \
+        isPasswordAndConfirmationValid(password, confirmation, self.signUpErrorsLabel):
+            checkAppDir()
+            if isUserExist(username):
+                errorsLabel.setText('Username already taken')
+                validSignUp = False
+            else:
+                makeUserDb(username)
+                addUser(username, password)
     else:
-        errorsLabel.setText('Username already used')
-        return False
+        errorsLabel.setText('Invalid username or password')
+        validSignUp = False
+    return validSignUp
