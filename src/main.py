@@ -2,15 +2,20 @@ from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QFrame, QPushButton, QLabel, QLineEdit, QTableView)
 from PyQt6.uic import loadUi
 import sys
-from signUpFunctions import (checkAppDir, addUser, isUsernameValid, isPasswordAndConfirmationValid,
-    submitSignUp, makeUserDb, submitLogin)
+from signUpLoginFunctions import submitSignUp, submitLogin
 
 
 class MainWindow(QMainWindow):
 
     def __init__(self):
+        self.uiFilesDir = 'UI'
+        self.mainWindowUIFile = f'{self.uiFilesDir}/mainWindow.ui'
+        self.loginUIFile = f'{self.uiFilesDir}/loginFrame.ui'
+        self.signUpUIFile = f'{self.uiFilesDir}/signUpFrame.ui'
+        self.loggedInUIFile = f'{self.uiFilesDir}/loggedInFrame.ui'
+
         super().__init__()
-        loadUi('mainWindow.ui', self)
+        loadUi(self.mainWindowUIFile, self)
 
         self.initialFrame = self.findChild(QFrame, name='initialFrame')
         # Login Button
@@ -43,7 +48,7 @@ class MainWindow(QMainWindow):
 
     def _loadLoginWindowVars(self):
         # Login Frame
-        self.loginFrame = loadUi('loginFrame.ui')
+        self.loginFrame = loadUi(self.loginUIFile)
         # Username Line Edit
         self.loginUsernameLineEdit = self.loginFrame.findChild(
             QLineEdit, name='usernameLineEdit')
@@ -88,7 +93,7 @@ class MainWindow(QMainWindow):
 
     def _loadSignUpWindowVars(self):
         # Sign Up Frame
-        self.signUpFrame = loadUi('signUpFrame.ui')
+        self.signUpFrame = loadUi(self.signUpUIFile)
         # Username Line Edit
         self.signUpUsernameLineEdit = self.signUpFrame.findChild(
             QLineEdit, name='usernameLineEdit')
@@ -121,7 +126,7 @@ class MainWindow(QMainWindow):
 
     def _loadLoggedInWindowVars(self):
         # Logged In Frame
-        self.loggedInFrame = loadUi('loggedInFrame.ui')
+        self.loggedInFrame = loadUi(self.loggedInUIFile)
         # Add Password Button
         self.addPasswordButton = self.loggedInFrame.findChild(
             QPushButton, name='addPasswordButton')

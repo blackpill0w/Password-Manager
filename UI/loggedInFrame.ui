@@ -38,7 +38,7 @@
             <property name="maximumSize">
              <size>
               <width>40</width>
-              <height>50</height>
+              <height>30</height>
              </size>
             </property>
             <property name="statusTip">
@@ -49,7 +49,7 @@
             </property>
             <property name="icon">
              <iconset>
-              <normaloff>left_arrow.png</normaloff>left_arrow.png</iconset>
+              <normaloff>../Img/left_arrow.png</normaloff>../Img/left_arrow.png</iconset>
             </property>
             <property name="iconSize">
              <size>
@@ -88,7 +88,7 @@
             </property>
             <property name="icon">
              <iconset>
-              <normaloff>plus_sign.png</normaloff>plus_sign.png</iconset>
+              <normaloff>../Img/plus_sign.png</normaloff>../Img/plus_sign.png</iconset>
             </property>
             <property name="iconSize">
              <size>
