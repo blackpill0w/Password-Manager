@@ -31,20 +31,30 @@ class MainWindow(QMainWindow):
         self._loadSignUpWindowVars()
         self._loadLoggedInWindowVars()
 
+        # Line Edits that get cleared
+        # whenever we switch from login to signup, etc
+        self.widgetsToClear = [
+            self.loginUsernameLineEdit,
+            self.loginPasswordLineEdit,
+            self.loginErrorsLabel,
+            self.signUpUsernameLineEdit,
+            self.signUpPasswordLineEdit,
+            self.signUpPasswordConfirmationLineEdit,
+            self.signUpErrorsLabel,
+        ]
+
         self.show()
 
     def _login(self, usernameLineEdit, passwordLineEdit, loginErrorsLabel):
         # Check that username and password are valid
         username = usernameLineEdit.text()
         password = passwordLineEdit.text()
-        
+
         if submitLogin(username, password, loginErrorsLabel):
-            print('here')
-            usernameLineEdit.setText('')
-            passwordLineEdit.setText('')
             self._changeActiveFrame(
-                    self.loginFrame, self.loggedInFrame, f'Password Manager - {username}'
-                )
+                self.loginFrame, self.loggedInFrame,
+                f'Password Manager - {username}',
+            )
 
     def _loadLoginWindowVars(self):
         # Login Frame
@@ -64,13 +74,19 @@ class MainWindow(QMainWindow):
                     self.loginUsernameLineEdit,
                     self.loginPasswordLineEdit,
                     self.loginErrorsLabel
-                    )
-            )
+                )
+        )
         # Go Back Button
         self.goBackButton = self.loginFrame.findChild(
             QPushButton, name='goBackButton')
-        self.goBackButton.clicked.connect(lambda: self._changeActiveFrame(
-            self.loginFrame, self.initialFrame, 'Password Manager'))
+        self.goBackButton.clicked.connect(
+            lambda:
+                self._changeActiveFrame(
+                    self.loginFrame,
+                    self.initialFrame,
+                    'Password Manager'
+                )
+        )
         # Errors Label
         self.loginErrorsLabel = self.loginFrame.findChild(
             QLabel, name='errorsLabel')
@@ -82,13 +98,11 @@ class MainWindow(QMainWindow):
         username = usernameLineEdit.text()
         password = passwordLineEdit.text()
         confirmation = confirmationLineEdit.text()
-        
-        if submitSignUp(username, password, self.signUpErrorsLabel):
-            # Remove the credentials
-            lineEditsToClear = []# [usernameLineEdit, passwordLineEdit, confirmationLineEdit,]
-    
+
+        if submitSignUp(username, password, confirmation, self.signUpErrorsLabel):
             self._changeActiveFrame(
-                self.signUpFrame, self.loggedInFrame, f'Password Manager - {username}', lineEditsToClear
+                self.signUpFrame, self.loggedInFrame,
+                f'Password Manager - {username}'
             )
 
     def _loadSignUpWindowVars(self):
@@ -120,7 +134,7 @@ class MainWindow(QMainWindow):
         # Errors Label
         self.signUpErrorsLabel = self.signUpFrame.findChild(
             QLabel, name='errorsLabel')
-        
+
         self.signUpErrorsLabel.setText('')
         self.signUpErrorsLabel.setStyleSheet('color: red')
 
@@ -142,19 +156,19 @@ class MainWindow(QMainWindow):
                     self.initialFrame,
                     'Password Manager'
                 )
-            )
+        )
         # Table To Show Passwords
         self.dataTable = self.loggedInFrame.findChild(QTableView, 'dataTable')
 
-    def _changeActiveFrame(self, frameToHide, frameToShow, newWindowTitle=None, lineEditsToClear=None):
-        if type(lineEditsToClear) is list:
-            for e in lineEditsToClear:
-                e.setText('')
+    def _changeActiveFrame(self, frameToHide, frameToShow, newWindowTitle=None):
+        for i in self.widgetsToClear:
+            i.setText('')
         if newWindowTitle is not None:
             self.setWindowTitle(newWindowTitle)
         frameToHide.hide()
         frameToShow.setParent(self)
         frameToShow.show()
+
 
 def main():
     app = QApplication(sys.argv)

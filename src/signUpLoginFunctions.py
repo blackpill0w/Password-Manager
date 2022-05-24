@@ -1,11 +1,15 @@
-import re, sqlite3, os
+import re
+import sqlite3
+import os
 from hashlib import sha256
 from settings import DB_DIR, USERS_DB_PATH, PASSWORDS_TABLE, USERS_TABLE
+
 
 def sha256Encrypt(text) -> str:
     """SHA256 encryption made simple."""
     encoded_text = text.encode()
     return sha256(encoded_text).hexdigest()
+
 
 def checkAppDir():
     """Check if the application directory (usually named npassword_manager) exists.
@@ -21,6 +25,7 @@ def checkAppDir():
 
         conn.commit()
         conn.close()
+
 
 def isUserExist(username):
     """Check if user has an account, returns a bool value."""
@@ -38,40 +43,46 @@ def isUserExist(username):
 
     return False if result == [] else True
 
+
 def getPasswordsFromDatabase(dbPath) -> list:
     conn = sqlite3.connect(dbPath)
     cur = conn.cursor()
-    
+
     data = list(cur.execute(f'SELECT * FROM {PASSWORDS_TABLE}'))
 
     conn.close()
 
     return data
 
+
 def submitLogin(username, password, errorsLabel) -> bool:
     # Var to be returned
     validLogin = True
-    
-    encrypted_password = sha256Encrypt(password)
-    conn = sqlite3.connect(USERS_DB_PATH)
-    cur = conn.cursor()
-
-    result = list(
-        cur.execute(
-            f"SELECT * FROM {USERS_TABLE} WHERE user = :username AND password = :password",
-            {"username": username, "password": encrypted_password},
-        ),
-    )
-    conn.close()
-
-    if result == []:
-        errorsLabel.setText("Invalid username or password")
+    if username == '' or password == '':
         validLogin = False
+        errorsLabel.setText('Missing information')
     else:
-        dbPath = f"{DB_DIR}/{username}.sqlite"
-        data = getPasswordsFromDatabase(dbPath)
-        # TODO: Add passwords to the table
+        encrypted_password = sha256Encrypt(password)
+        conn = sqlite3.connect(USERS_DB_PATH)
+        cur = conn.cursor()
+
+        result = list(
+            cur.execute(
+                f"SELECT * FROM {USERS_TABLE} WHERE user = :username AND password = :password",
+                {"username": username, "password": encrypted_password},
+            ),
+        )
+        conn.close()
+
+        if result == []:
+            errorsLabel.setText("Invalid username or password")
+            validLogin = False
+        else:
+            dbPath = f"{DB_DIR}/{username}.sqlite"
+            data = getPasswordsFromDatabase(dbPath)
+            # TODO: Add passwords to the table
     return validLogin
+
 
 def isUsernameValid(username, errorsLabel) -> bool:
     """
@@ -90,6 +101,7 @@ def isUsernameValid(username, errorsLabel) -> bool:
         errorsLabel.setText('')
         return True
 
+
 def isPasswordAndConfirmationValid(password, confirmation, errorsLabel) -> bool:
     """
     Simple function to check if password is valid (8 characters long) and
@@ -103,6 +115,7 @@ def isPasswordAndConfirmationValid(password, confirmation, errorsLabel) -> bool:
         errorsLabel.setText('Invalid password.')
         return False
 
+
 def makeUserDb(username):
     """Create a database for the user, and create a passwords table (description, password)."""
 
@@ -111,10 +124,12 @@ def makeUserDb(username):
     conn = sqlite3.connect(dbPath)
     cur = conn.cursor()
 
-    cur.execute(f"CREATE TABLE {PASSWORDS_TABLE} (description TEXT, password TEXT)")
+    cur.execute(
+        f"CREATE TABLE {PASSWORDS_TABLE} (description TEXT, password TEXT)")
 
     conn.commit()
     conn.close()
+
 
 def addUser(username, password):
     """Add user to the users database."""
@@ -130,12 +145,16 @@ def addUser(username, password):
     conn.commit()
     conn.close()
 
-def submitSignUp(username, password, errorsLabel) -> bool:
+
+def submitSignUp(username, password, confirmation, errorsLabel) -> bool:
     # Variable to be returned
     validSignUp = True
-
-    if isUsernameValid(username, self.signUpErrorsLabel) and \
-        isPasswordAndConfirmationValid(password, confirmation, self.signUpErrorsLabel):
+    if username == '' or password == '' or confirmation == '':
+        validSignUp = False
+        errorsLabel.setText('Missing information')
+    else:
+        if isUsernameValid(username, errorsLabel) and \
+                isPasswordAndConfirmationValid(password, confirmation, errorsLabel):
             checkAppDir()
             if isUserExist(username):
                 errorsLabel.setText('Username already taken')
@@ -143,7 +162,7 @@ def submitSignUp(username, password, errorsLabel) -> bool:
             else:
                 makeUserDb(username)
                 addUser(username, password)
-    else:
-        errorsLabel.setText('Invalid username or password')
-        validSignUp = False
+        else:
+            errorsLabel.setText('Invalid username or password')
+            validSignUp = False
     return validSignUp
