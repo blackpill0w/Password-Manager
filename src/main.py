@@ -1,18 +1,19 @@
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QFrame, QPushButton, QLabel, QLineEdit, QTableView)
 from PyQt6.uic import loadUi
-import sys
+import sys, os
 from signUpLoginFunctions import submitSignUp, submitLogin
 
 
 class MainWindow(QMainWindow):
 
     def __init__(self):
-        self.uiFilesDir = 'UI'
-        self.mainWindowUIFile = f'{self.uiFilesDir}/mainWindow.ui'
-        self.loginUIFile = f'{self.uiFilesDir}/loginFrame.ui'
-        self.signUpUIFile = f'{self.uiFilesDir}/signUpFrame.ui'
-        self.loggedInUIFile = f'{self.uiFilesDir}/loggedInFrame.ui'
+        self.rootDir = __file__.split('src')[0]
+        self.uiFilesDir = os.path.join(self.rootDir, 'UI')
+        self.mainWindowUIFile = os.path.join(self.uiFilesDir, 'mainWindow.ui')
+        self.loginUIFile = os.path.join(self.uiFilesDir, 'loginFrame.ui')
+        self.signUpUIFile = os.path.join(self.uiFilesDir, 'signUpFrame.ui')
+        self.loggedInUIFile = os.path.join(self.uiFilesDir, 'loggedInFrame.ui')
 
         super().__init__()
         loadUi(self.mainWindowUIFile, self)
@@ -50,7 +51,7 @@ class MainWindow(QMainWindow):
         username = usernameLineEdit.text()
         password = passwordLineEdit.text()
 
-        if submitLogin(username, password, loginErrorsLabel):
+        if submitLogin(username, password, loginErrorsLabel, self.dataTable):
             self._changeActiveFrame(
                 self.loginFrame, self.loggedInFrame,
                 f'Password Manager - {username}',
@@ -159,6 +160,8 @@ class MainWindow(QMainWindow):
         )
         # Table To Show Passwords
         self.dataTable = self.loggedInFrame.findChild(QTableView, 'dataTable')
+        self.dataTable.setColumnWidth(0, 380)
+        self.dataTable.setColumnWidth(1, 300)
 
     def _changeActiveFrame(self, frameToHide, frameToShow, newWindowTitle=None):
         for i in self.widgetsToClear:

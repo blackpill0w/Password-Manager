@@ -3,6 +3,7 @@ import sqlite3
 import os
 from hashlib import sha256
 from settings import DB_DIR, USERS_DB_PATH, PASSWORDS_TABLE, USERS_TABLE
+from PyQt6.QtWidgets import QTableWidgetItem
 
 
 def sha256Encrypt(text) -> str:
@@ -55,7 +56,7 @@ def getPasswordsFromDatabase(dbPath) -> list:
     return data
 
 
-def submitLogin(username, password, errorsLabel) -> bool:
+def submitLogin(username, password, errorsLabel, itemBasedQTableView) -> bool:
     # Var to be returned
     validLogin = True
     if username == '' or password == '':
@@ -80,7 +81,13 @@ def submitLogin(username, password, errorsLabel) -> bool:
         else:
             dbPath = f"{DB_DIR}/{username}.sqlite"
             data = getPasswordsFromDatabase(dbPath)
-            # TODO: Add passwords to the table
+            for i, d in enumerate(data):
+                # Increment the number of rows
+                itemBasedQTableView.setRowCount(itemBasedQTableView.rowCount()+1)
+                # Description
+                itemBasedQTableView.setItem(i, 0, QTableWidgetItem(d[0]))
+                # Password
+                itemBasedQTableView.setItem(i, 1, QTableWidgetItem(d[1]))
     return validLogin
 
 
