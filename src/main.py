@@ -1,7 +1,8 @@
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QFrame, QPushButton, QLabel, QLineEdit, QTableView)
 from PyQt6.uic import loadUi
-import sys, os
+import sys
+import os
 from signUpLoginFunctions import submitSignUp, submitLogin
 
 
@@ -139,6 +140,12 @@ class MainWindow(QMainWindow):
         self.signUpErrorsLabel.setText('')
         self.signUpErrorsLabel.setStyleSheet('color: red')
 
+    def _logout(self):
+        self.dataTable.clear()
+        self._changeActiveFrame(
+            self.loggedInFrame, self.initialFrame, 'Password Manager'
+        )
+
     def _loadLoggedInWindowVars(self):
         # Logged In Frame
         self.loggedInFrame = loadUi(self.loggedInUIFile)
@@ -150,14 +157,7 @@ class MainWindow(QMainWindow):
         self.logOutButton = self.loggedInFrame.findChild(
             QPushButton, name='logOutButton')
         # TODO
-        self.logOutButton.clicked.connect(
-            lambda:
-                self._changeActiveFrame(
-                    self.loggedInFrame,
-                    self.initialFrame,
-                    'Password Manager'
-                )
-        )
+        self.logOutButton.clicked.connect()
         # Table To Show Passwords
         self.dataTable = self.loggedInFrame.findChild(QTableView, 'dataTable')
         self.dataTable.setColumnWidth(0, 380)

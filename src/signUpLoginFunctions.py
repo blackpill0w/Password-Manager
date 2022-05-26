@@ -88,6 +88,7 @@ def submitLogin(username, password, errorsLabel, itemBasedQTableView) -> bool:
                 itemBasedQTableView.setItem(i, 0, QTableWidgetItem(d[0]))
                 # Password
                 itemBasedQTableView.setItem(i, 1, QTableWidgetItem(d[1]))
+            data = None
     return validLogin
 
 
