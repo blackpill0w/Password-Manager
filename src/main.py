@@ -1,23 +1,55 @@
 from PyQt6.QtWidgets import (
-    QApplication, QMainWindow, QFrame, QPushButton, QLabel, QLineEdit, QTableView)
+    QApplication, QMainWindow, QFrame,
+    QPushButton, QLabel, QLineEdit, QTableView,
+    QWidget
+)
 from PyQt6.uic import loadUi
 import sys
 import os
-from signUpLoginFunctions import submitSignUp, submitLogin
+from signUpLoginFunctions import submitSignUp, submitLogin, addPassword, updateTable
+
+ROOT_DIR = __file__.split('src')[0] # project dir
+UI_FILES_DIR = os.path.join(ROOT_DIR, 'UI')
+MAIN_WIN_UI_FILE = os.path.join(UI_FILES_DIR, 'mainWindow.ui')
+LOGIN_UI_FILE = os.path.join(UI_FILES_DIR, 'loginFrame.ui')
+SIGN_UP_UI_FILE = os.path.join(UI_FILES_DIR, 'signUpFrame.ui')
+LOGGED_IN_UI_FILE = os.path.join(UI_FILES_DIR, 'loggedInFrame.ui')
+ADD_PASS_UI_FILE = os.path.join(UI_FILES_DIR, 'addPasswordWin.ui')
+
+class AddPasswordWindow(QWidget):
+    def __init__(self, username: str, passwordsTable: QTableView):
+        self.username = username
+        self.table = passwordsTable
+
+        super().__init__()
+        loadUi(ADD_PASS_UI_FILE, self)
+
+        self.descriptionLE = self.findChild(QLineEdit, name='descriptionLE')
+        self.passwordLE = self.findChild(QLineEdit, name='passwordLE')
+        self.saveButton = self.findChild(QPushButton, name='saveButton')
+        self.saveButton.clicked.connect(self._addPassword)
+
+        self.show()
+
+    def _clearLE(self):
+        self.descriptionLE.setText('')
+        self.passwordLE.setText('')
+
+    def _addPassword(self):
+        addPassword(self.username,
+                    self.descriptionLE.text(),
+                    self.passwordLE.text()
+                    )
+        self._clearLE()
+        updateTable(self.username, self.table)
 
 
 class MainWindow(QMainWindow):
-
     def __init__(self):
-        self.rootDir = __file__.split('src')[0]
-        self.uiFilesDir = os.path.join(self.rootDir, 'UI')
-        self.mainWindowUIFile = os.path.join(self.uiFilesDir, 'mainWindow.ui')
-        self.loginUIFile = os.path.join(self.uiFilesDir, 'loginFrame.ui')
-        self.signUpUIFile = os.path.join(self.uiFilesDir, 'signUpFrame.ui')
-        self.loggedInUIFile = os.path.join(self.uiFilesDir, 'loggedInFrame.ui')
-
         super().__init__()
-        loadUi(self.mainWindowUIFile, self)
+        loadUi(MAIN_WIN_UI_FILE, self)
+
+        self.loggedUser = None
 
         self.initialFrame = self.findChild(QFrame, name='initialFrame')
         # Login Button
@@ -53,14 +85,16 @@ class MainWindow(QMainWindow):
         password = passwordLineEdit.text()
 
         if submitLogin(username, password, loginErrorsLabel, self.dataTable):
+            self.loggedUser = username
             self._changeActiveFrame(
                 self.loginFrame, self.loggedInFrame,
                 f'Password Manager - {username}',
             )
 
+
     def _loadLoginWindowVars(self):
         # Login Frame
-        self.loginFrame = loadUi(self.loginUIFile)
+        self.loginFrame = loadUi(LOGIN_UI_FILE)
         # Username Line Edit
         self.loginUsernameLineEdit = self.loginFrame.findChild(
             QLineEdit, name='usernameLineEdit')
@@ -102,6 +136,7 @@ class MainWindow(QMainWindow):
         confirmation = confirmationLineEdit.text()
 
         if submitSignUp(username, password, confirmation, self.signUpErrorsLabel):
+            self.loggedUser = username
             self._changeActiveFrame(
                 self.signUpFrame, self.loggedInFrame,
                 f'Password Manager - {username}'
@@ -109,7 +144,7 @@ class MainWindow(QMainWindow):
 
     def _loadSignUpWindowVars(self):
         # Sign Up Frame
-        self.signUpFrame = loadUi(self.signUpUIFile)
+        self.signUpFrame = loadUi(SIGN_UP_UI_FILE)
         # Username Line Edit
         self.signUpUsernameLineEdit = self.signUpFrame.findChild(
             QLineEdit, name='usernameLineEdit')
@@ -141,23 +176,31 @@ class MainWindow(QMainWindow):
         self.signUpErrorsLabel.setStyleSheet('color: red')
 
     def _logout(self):
+        self.loggedUser = None
         self.dataTable.clear()
         self._changeActiveFrame(
             self.loggedInFrame, self.initialFrame, 'Password Manager'
         )
-
+    def _addPasswordWin(self):
+        self.tempwin = AddPasswordWindow(self.loggedUser, self.dataTable)
     def _loadLoggedInWindowVars(self):
         # Logged In Frame
-        self.loggedInFrame = loadUi(self.loggedInUIFile)
+        self.loggedInFrame = loadUi(LOGGED_IN_UI_FILE)
         # Add Password Button
         self.addPasswordButton = self.loggedInFrame.findChild(
             QPushButton, name='addPasswordButton')
-        # TODO
+        self.addPasswordButton.clicked.connect(self._addPasswordWin)
         # Log Out Button
         self.logOutButton = self.loggedInFrame.findChild(
             QPushButton, name='logOutButton')
-        # TODO
-        self.logOutButton.clicked.connect()
+        self.logOutButton.clicked.connect(
+            lambda:
+                self._changeActiveFrame(
+                    self.loggedInFrame,
+                    self.initialFrame,
+                    'Password Manager'
+                )
+        )
         # Table To Show Passwords
         self.dataTable = self.loggedInFrame.findChild(QTableView, 'dataTable')
         self.dataTable.setColumnWidth(0, 380)

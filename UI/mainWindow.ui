@@ -52,7 +52,6 @@
        <font>
         <family>Carlito</family>
         <pointsize>14</pointsize>
-        <weight>50</weight>
         <bold>false</bold>
        </font>
       </property>
@@ -115,6 +114,10 @@
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
+ <tabstops>
+  <tabstop>loginButton</tabstop>
+  <tabstop>signUpButton</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>
