@@ -10,27 +10,30 @@ try:
     from PyQt6.uic.load_ui import loadUi
 except ModuleNotFoundError:
     import subprocess
-    print('Installing dependencies (PyQt5)...')
-    reqs_file = os.path.join(__file__.split('src')[0], 'requirements.txt')
+    print('PyQt6 is not installed, please open the \
+        application again after installation is finished.')
+    print('Installing PyQt6...')
     try:
-        subprocess.run(['pip3', '-r', reqs_file])
+        subprocess.run(['pip3', 'install', 'PyQt6'])
+        from PyQt6.QtWidgets import (
+            QApplication, QMainWindow, QFrame,
+            QPushButton, QLabel, QLineEdit, QTableView,
+            QWidget
+        )
+        from PyQt6.uic.load_ui import loadUi
     except FileNotFoundError as e:
         if e.filename == 'pip3':
             print("Couldn't find the command 'pip',\
                   please make sure it is installed and try again.")
-        elif e.filename == reqs_file:
-            print("Couldn't find the requirements file 'requirements.txt',\
-            try installing PyQt6 manually\
-            or put 'pyqt6' in '/path/to/project/src/requirements.txt'")
         exit(1)
 
-ROOT_DIR = __file__.split('src')[0] # project dir
-UI_FILES_DIR = os.path.join(ROOT_DIR, 'UI')
-MAIN_WIN_UI_FILE = os.path.join(UI_FILES_DIR, 'mainWindow.ui')
-LOGIN_UI_FILE = os.path.join(UI_FILES_DIR, 'loginFrame.ui')
-SIGN_UP_UI_FILE = os.path.join(UI_FILES_DIR, 'signUpFrame.ui')
+ROOT_DIR          = __file__.split('src')[0] # project dir
+UI_FILES_DIR      = os.path.join(ROOT_DIR, 'UI')
+MAIN_WIN_UI_FILE  = os.path.join(UI_FILES_DIR, 'mainWindow.ui')
+LOGIN_UI_FILE     = os.path.join(UI_FILES_DIR, 'loginFrame.ui')
+SIGN_UP_UI_FILE   = os.path.join(UI_FILES_DIR, 'signUpFrame.ui')
 LOGGED_IN_UI_FILE = os.path.join(UI_FILES_DIR, 'loggedInFrame.ui')
-ADD_PASS_UI_FILE = os.path.join(UI_FILES_DIR, 'addPasswordWin.ui')
+ADD_PASS_UI_FILE  = os.path.join(UI_FILES_DIR, 'addPasswordWin.ui')
 
 class AddPasswordWindow(QWidget):
     def __init__(self, username: str, passwordsTable: QTableView):
